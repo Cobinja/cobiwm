@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+_Name=Cobiwm
+Exec=cobiwm
+NoDisplay=true

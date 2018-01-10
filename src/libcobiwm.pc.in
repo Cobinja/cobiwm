@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+girdir=@libdir@/cobiwm
+typelibdir=@libdir@/cobiwm
+
+Name: libcobiwm
+Description: Cobiwm window manager library
+Requires: gsettings-desktop-schemas gtk+-3.0 @CLUTTER_PACKAGE@ x11
+Version: @VERSION@
+Libs: -L${libdir} -lcobiwm
+Cflags: -I${includedir}/cobiwm

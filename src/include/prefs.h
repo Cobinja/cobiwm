@@ -1,0 +1,401 @@
+/* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
+
+/* Cobiwm preferences */
+
+/*
+ * Copyright (C) 2001 Havoc Pennington
+ * Copyright (C) 2006 Elijah Newren
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef COBIWM_PREFS_H
+#define COBIWM_PREFS_H
+
+/* This header is a "common" one between the UI and core side */
+#include <common.h>
+#include <types.h>
+#include <pango/pango-font.h>
+#include <gdesktop-enums.h>
+#include <gio/gio.h>
+
+/**
+ * CobiwmPreference:
+ * @COBIWM_PREF_MOUSE_BUTTON_MODS: mouse button modifiers
+ * @COBIWM_PREF_FOCUS_MODE: focus mode
+ * @COBIWM_PREF_FOCUS_NEW_WINDOWS: focus new windows
+ * @COBIWM_PREF_ATTACH_MODAL_DIALOGS: attach modal dialogs
+ * @COBIWM_PREF_RAISE_ON_CLICK: raise on click
+ * @COBIWM_PREF_ACTION_DOUBLE_CLICK_TITLEBAR: action double click titlebar
+ * @COBIWM_PREF_ACTION_MIDDLE_CLICK_TITLEBAR: action middle click titlebar
+ * @COBIWM_PREF_ACTION_RIGHT_CLICK_TITLEBAR: action right click titlebar
+ * @COBIWM_PREF_AUTO_RAISE: auto-raise
+ * @COBIWM_PREF_AUTO_RAISE_DELAY: auto-raise delay
+ * @COBIWM_PREF_FOCUS_CHANGE_ON_POINTER_REST: focus change on pointer rest
+ * @COBIWM_PREF_TITLEBAR_FONT: title-bar font
+ * @COBIWM_PREF_NUM_WORKSPACES: number of workspaces
+ * @COBIWM_PREF_KEYBINDINGS: keybindings
+ * @COBIWM_PREF_DISABLE_WORKAROUNDS: disable workarounds
+ * @COBIWM_PREF_BUTTON_LAYOUT: button layout
+ * @COBIWM_PREF_WORKSPACE_NAMES: workspace names
+ * @COBIWM_PREF_VISUAL_BELL: visual bell
+ * @COBIWM_PREF_AUDIBLE_BELL: audible bell
+ * @COBIWM_PREF_VISUAL_BELL_TYPE: visual bell type
+ * @COBIWM_PREF_GNOME_ACCESSIBILITY: GNOME accessibility
+ * @COBIWM_PREF_GNOME_ANIMATIONS: GNOME animations
+ * @COBIWM_PREF_CURSOR_THEME: cursor theme
+ * @COBIWM_PREF_CURSOR_SIZE: cursor size
+ * @COBIWM_PREF_RESIZE_WITH_RIGHT_BUTTON: resize with right button
+ * @COBIWM_PREF_EDGE_TILING: edge tiling
+ * @COBIWM_PREF_FORCE_FULLSCREEN: force fullscreen
+ * @COBIWM_PREF_WORKSPACES_ONLY_ON_PRIMARY: workspaces only on primary
+ * @COBIWM_PREF_DRAGGABLE_BORDER_WIDTH: draggable border width
+ * @COBIWM_PREF_AUTO_MAXIMIZE: auto-maximize
+ * @COBIWM_PREF_CENTER_NEW_WINDOWS: center new windows
+ */
+
+/* Keep in sync with GSettings schemas! */
+typedef enum
+{
+  COBIWM_PREF_MOUSE_BUTTON_MODS,
+  COBIWM_PREF_FOCUS_MODE,
+  COBIWM_PREF_FOCUS_NEW_WINDOWS,
+  COBIWM_PREF_ATTACH_MODAL_DIALOGS,
+  COBIWM_PREF_RAISE_ON_CLICK,
+  COBIWM_PREF_ACTION_DOUBLE_CLICK_TITLEBAR,
+  COBIWM_PREF_ACTION_MIDDLE_CLICK_TITLEBAR,
+  COBIWM_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
+  COBIWM_PREF_AUTO_RAISE,
+  COBIWM_PREF_AUTO_RAISE_DELAY,
+  COBIWM_PREF_FOCUS_CHANGE_ON_POINTER_REST,
+  COBIWM_PREF_TITLEBAR_FONT,
+  COBIWM_PREF_NUM_WORKSPACES,
+  COBIWM_PREF_KEYBINDINGS,
+  COBIWM_PREF_DISABLE_WORKAROUNDS,
+  COBIWM_PREF_BUTTON_LAYOUT,
+  COBIWM_PREF_WORKSPACE_NAMES,
+  COBIWM_PREF_VISUAL_BELL,
+  COBIWM_PREF_AUDIBLE_BELL,
+  COBIWM_PREF_VISUAL_BELL_TYPE,
+  COBIWM_PREF_GNOME_ACCESSIBILITY,
+  COBIWM_PREF_GNOME_ANIMATIONS,
+  COBIWM_PREF_CURSOR_THEME,
+  COBIWM_PREF_CURSOR_SIZE,
+  COBIWM_PREF_RESIZE_WITH_RIGHT_BUTTON,
+  COBIWM_PREF_EDGE_TILING,
+  COBIWM_PREF_FORCE_FULLSCREEN,
+  COBIWM_PREF_WORKSPACES_ONLY_ON_PRIMARY,
+  COBIWM_PREF_DRAGGABLE_BORDER_WIDTH,
+  COBIWM_PREF_AUTO_MAXIMIZE,
+  COBIWM_PREF_CENTER_NEW_WINDOWS,
+  COBIWM_PREF_DRAG_THRESHOLD,
+} CobiwmPreference;
+
+typedef void (* CobiwmPrefsChangedFunc) (CobiwmPreference pref,
+                                       gpointer       user_data);
+
+void cobiwm_prefs_add_listener    (CobiwmPrefsChangedFunc func,
+                                 gpointer             user_data);
+void cobiwm_prefs_remove_listener (CobiwmPrefsChangedFunc func,
+                                 gpointer             user_data);
+
+void cobiwm_prefs_init (void);
+
+void cobiwm_prefs_override_preference_schema (const char *key,
+                                            const char *schema);
+
+const char* cobiwm_preference_to_string (CobiwmPreference pref);
+
+CobiwmVirtualModifier         cobiwm_prefs_get_mouse_button_mods  (void);
+gint                        cobiwm_prefs_get_mouse_button_resize (void);
+gint                        cobiwm_prefs_get_mouse_button_menu  (void);
+GDesktopFocusMode           cobiwm_prefs_get_focus_mode         (void);
+GDesktopFocusNewWindows     cobiwm_prefs_get_focus_new_windows  (void);
+gboolean                    cobiwm_prefs_get_attach_modal_dialogs (void);
+gboolean                    cobiwm_prefs_get_raise_on_click     (void);
+/* returns NULL if GTK default should be used */
+const PangoFontDescription* cobiwm_prefs_get_titlebar_font      (void);
+int                         cobiwm_prefs_get_num_workspaces     (void);
+gboolean                    cobiwm_prefs_get_disable_workarounds (void);
+gboolean                    cobiwm_prefs_get_auto_raise         (void);
+int                         cobiwm_prefs_get_auto_raise_delay   (void);
+gboolean                    cobiwm_prefs_get_focus_change_on_pointer_rest (void);
+gboolean                    cobiwm_prefs_get_gnome_accessibility (void);
+gboolean                    cobiwm_prefs_get_gnome_animations   (void);
+gboolean                    cobiwm_prefs_get_edge_tiling        (void);
+gboolean                    cobiwm_prefs_get_auto_maximize      (void);
+gboolean                    cobiwm_prefs_get_center_new_windows (void);
+gboolean                    cobiwm_prefs_get_show_fallback_app_menu (void);
+
+void                        cobiwm_prefs_get_button_layout (CobiwmButtonLayout *button_layout);
+
+/* Double, right, middle click can be configured to any titlebar cobiwm-action */
+GDesktopTitlebarAction      cobiwm_prefs_get_action_double_click_titlebar (void);
+GDesktopTitlebarAction      cobiwm_prefs_get_action_middle_click_titlebar (void);
+GDesktopTitlebarAction      cobiwm_prefs_get_action_right_click_titlebar (void);
+
+void cobiwm_prefs_set_num_workspaces (int n_workspaces);
+
+const char* cobiwm_prefs_get_workspace_name    (int         i);
+void        cobiwm_prefs_change_workspace_name (int         i,
+                                              const char *name);
+
+const char* cobiwm_prefs_get_cursor_theme      (void);
+int         cobiwm_prefs_get_cursor_size       (void);
+gboolean    cobiwm_prefs_get_compositing_manager (void);
+gboolean    cobiwm_prefs_get_force_fullscreen  (void);
+
+void cobiwm_prefs_set_force_fullscreen (gboolean whether);
+
+gboolean cobiwm_prefs_get_workspaces_only_on_primary (void);
+
+int      cobiwm_prefs_get_draggable_border_width (void);
+int      cobiwm_prefs_get_drag_threshold (void);
+
+gboolean cobiwm_prefs_get_ignore_request_hide_titlebar (void);
+void     cobiwm_prefs_set_ignore_request_hide_titlebar (gboolean whether);
+
+/**
+ * CobiwmKeyBindingAction:
+ * @COBIWM_KEYBINDING_ACTION_NONE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_1: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_2: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_3: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_4: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_5: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_6: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_7: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_8: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_9: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_10: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_11: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_12: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_LEFT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_RIGHT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_UP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_DOWN: FILLME
+ * @COBIWM_KEYBINDING_ACTION_WORKSPACE_LAST: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_APPLICATIONS: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_APPLICATIONS_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_GROUP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_GROUP_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_WINDOWS: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_WINDOWS_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_PANELS: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SWITCH_PANELS_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_GROUP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_GROUP_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_WINDOWS: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_WINDOWS_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_PANELS: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CYCLE_PANELS_BACKWARD: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SHOW_DESKTOP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_PANEL_MAIN_MENU: FILLME
+ * @COBIWM_KEYBINDING_ACTION_PANEL_RUN_DIALOG: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_RECORDING: FILLME
+ * @COBIWM_KEYBINDING_ACTION_SET_SPEW_MARK: FILLME
+ * @COBIWM_KEYBINDING_ACTION_ACTIVATE_WINDOW_MENU: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_FULLSCREEN: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_MAXIMIZED: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_TILED_LEFT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_TILED_RIGHT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_ABOVE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MAXIMIZE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_UNMAXIMIZE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_SHADED: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MINIMIZE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_CLOSE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_BEGIN_MOVE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_BEGIN_RESIZE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_TOGGLE_ON_ALL_WORKSPACES: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_1: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_2: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_3: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_4: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_5: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_6: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_7: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_8: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_9: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_10: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_11: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_12: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_LEFT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_RIGHT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_UP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_DOWN: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_LAST: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_LEFT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_RIGHT: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_UP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_DOWN: FILLME
+ * @COBIWM_KEYBINDING_ACTION_RAISE_OR_LOWER: FILLME
+ * @COBIWM_KEYBINDING_ACTION_RAISE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_LOWER: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MAXIMIZE_VERTICALLY: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MAXIMIZE_HORIZONTALLY: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_NW: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_NE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_SW: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_SE: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_N: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_S: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_E: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_W: FILLME
+ * @COBIWM_KEYBINDING_ACTION_MOVE_TO_CENTER: FILLME
+ * @COBIWM_KEYBINDING_ACTION_OVERLAY_KEY: FILLME
+ * @COBIWM_KEYBINDING_ACTION_ALWAYS_ON_TOP: FILLME
+ * @COBIWM_KEYBINDING_ACTION_LAST: FILLME
+ */
+/* XXX FIXME This should be x-macroed, but isn't yet because it would be
+ * difficult (or perhaps impossible) to add the suffixes using the current
+ * system.  It needs some more thought, perhaps after the current system
+ * evolves a little.
+ */
+typedef enum _CobiwmKeyBindingAction
+{
+  COBIWM_KEYBINDING_ACTION_NONE,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_1,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_2,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_3,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_4,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_5,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_6,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_7,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_8,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_9,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_10,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_11,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_12,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_LEFT,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_RIGHT,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_UP,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_DOWN,
+  COBIWM_KEYBINDING_ACTION_WORKSPACE_LAST,
+  COBIWM_KEYBINDING_ACTION_SWITCH_APPLICATIONS,
+  COBIWM_KEYBINDING_ACTION_SWITCH_APPLICATIONS_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_SWITCH_GROUP,
+  COBIWM_KEYBINDING_ACTION_SWITCH_GROUP_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_SWITCH_WINDOWS,
+  COBIWM_KEYBINDING_ACTION_SWITCH_WINDOWS_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_SWITCH_PANELS,
+  COBIWM_KEYBINDING_ACTION_SWITCH_PANELS_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_CYCLE_GROUP,
+  COBIWM_KEYBINDING_ACTION_CYCLE_GROUP_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_CYCLE_WINDOWS,
+  COBIWM_KEYBINDING_ACTION_CYCLE_WINDOWS_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_CYCLE_PANELS,
+  COBIWM_KEYBINDING_ACTION_CYCLE_PANELS_BACKWARD,
+  COBIWM_KEYBINDING_ACTION_SHOW_DESKTOP,
+  COBIWM_KEYBINDING_ACTION_PANEL_MAIN_MENU,
+  COBIWM_KEYBINDING_ACTION_PANEL_RUN_DIALOG,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_RECORDING,
+  COBIWM_KEYBINDING_ACTION_SET_SPEW_MARK,
+  COBIWM_KEYBINDING_ACTION_ACTIVATE_WINDOW_MENU,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_FULLSCREEN,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_MAXIMIZED,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_TILED_LEFT,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_TILED_RIGHT,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_ABOVE,
+  COBIWM_KEYBINDING_ACTION_MAXIMIZE,
+  COBIWM_KEYBINDING_ACTION_UNMAXIMIZE,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_SHADED,
+  COBIWM_KEYBINDING_ACTION_MINIMIZE,
+  COBIWM_KEYBINDING_ACTION_CLOSE,
+  COBIWM_KEYBINDING_ACTION_BEGIN_MOVE,
+  COBIWM_KEYBINDING_ACTION_BEGIN_RESIZE,
+  COBIWM_KEYBINDING_ACTION_TOGGLE_ON_ALL_WORKSPACES,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_1,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_2,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_3,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_4,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_5,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_6,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_7,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_8,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_9,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_10,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_11,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_12,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_LEFT,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_RIGHT,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_UP,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_DOWN,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_LAST,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_LEFT,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_RIGHT,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_UP,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_MONITOR_DOWN,
+  COBIWM_KEYBINDING_ACTION_RAISE_OR_LOWER,
+  COBIWM_KEYBINDING_ACTION_RAISE,
+  COBIWM_KEYBINDING_ACTION_LOWER,
+  COBIWM_KEYBINDING_ACTION_MAXIMIZE_VERTICALLY,
+  COBIWM_KEYBINDING_ACTION_MAXIMIZE_HORIZONTALLY,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_NW,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_NE,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_SW,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_CORNER_SE,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_N,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_S,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_E,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_SIDE_W,
+  COBIWM_KEYBINDING_ACTION_MOVE_TO_CENTER,
+  COBIWM_KEYBINDING_ACTION_OVERLAY_KEY,
+  COBIWM_KEYBINDING_ACTION_ISO_NEXT_GROUP,
+  COBIWM_KEYBINDING_ACTION_ALWAYS_ON_TOP,
+
+  COBIWM_KEYBINDING_ACTION_LAST
+} CobiwmKeyBindingAction;
+
+/**
+ * CobiwmKeyBindingFlags:
+ * @COBIWM_KEY_BINDING_NONE: none
+ * @COBIWM_KEY_BINDING_PER_WINDOW: per-window
+ * @COBIWM_KEY_BINDING_BUILTIN: built-in
+ * @COBIWM_KEY_BINDING_IS_REVERSED: is reversed
+ */
+typedef enum
+{
+  COBIWM_KEY_BINDING_NONE,
+  COBIWM_KEY_BINDING_PER_WINDOW  = 1 << 0,
+  COBIWM_KEY_BINDING_BUILTIN     = 1 << 1,
+  COBIWM_KEY_BINDING_IS_REVERSED = 1 << 2,
+} CobiwmKeyBindingFlags;
+
+/**
+ * CobiwmKeyHandlerFunc:
+ * @display: a #CobiwmDisplay
+ * @screen: a #CobiwmScreen
+ * @window: a #CobiwmWindow
+ * @event: (type gpointer): a #ClutterKeyEvent
+ * @binding: a #CobiwmKeyBinding
+ * @user_data: data passed to the function
+ *
+ */
+typedef void (* CobiwmKeyHandlerFunc) (CobiwmDisplay     *display,
+                                     CobiwmScreen      *screen,
+                                     CobiwmWindow      *window,
+                                     ClutterKeyEvent *event,
+                                     CobiwmKeyBinding  *binding,
+                                     gpointer         user_data);
+
+GType cobiwm_key_binding_get_type    (void);
+
+CobiwmKeyBindingAction cobiwm_prefs_get_keybinding_action (const char *name);
+
+gboolean           cobiwm_prefs_get_visual_bell      (void);
+gboolean           cobiwm_prefs_bell_is_audible      (void);
+GDesktopVisualBellType cobiwm_prefs_get_visual_bell_type (void);
+
+#endif
